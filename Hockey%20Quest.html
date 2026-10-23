@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hockey Quest</title>
+<style>
+:root {
+  --site-primary: #183b63;
+  --site-secondary: #f18b35;
+  --site-background: #f3f6fb;
+  --site-on-primary: #ffffff;
+  --site-on-secondary: #172b43;
+  --site-on-background: #172b43;
+  --site-font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-font-heading: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --site-heading-scale: 1;
+  --site-spacing-scale: 1;
+  --site-radius-scale: 1;
+  --site-decoration-opacity: 1;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--site-font-body); color: var(--site-on-background); background: var(--site-background); }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+#app { min-height: 100vh; background-color: var(--site-background); color: var(--site-on-background); }
+.topbar { background: var(--site-primary); color: var(--site-on-primary); padding: 22px max(20px, calc((100vw - 1120px)/2)); display:flex; align-items:center; justify-content:space-between; gap:18px; }
+.brand { display:flex; align-items:center; gap:12px; font-weight:900; letter-spacing:.3px; font-size:1.2rem; }
+.logo { display:grid; place-items:center; width:44px; height:44px; border-radius:14px; background:var(--site-secondary); color:#172b43; font-size:1.4rem; }
+.top-meta { text-align:right; font-size:.86rem; opacity:.9; }
+
+.top-actions { display:flex; align-items:center; gap:14px; }
+.top-settings { border:1px solid #ffffff55; background:#ffffff16; color:#fff; padding:11px 14px; border-radius:11px; font-weight:850; white-space:nowrap; }
+.top-settings:hover { background:#ffffff28; }
+.settings-overlay { position:fixed; inset:0; background:#101b4366; z-index:9; display:none; }
+.settings-overlay.open { display:block; }
+.settings-panel { position:fixed; z-index:10; right:0; top:0; bottom:0; width:min(440px,100%); overflow:auto; padding:24px; background:#fff; color:#172b43; box-shadow:-18px 0 55px #101b4326; transform:translateX(105%); transition:transform .24s ease; visibility:hidden; }
+.settings-panel.open { transform:translateX(0); visibility:visible; }
+.settings-panel-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding-bottom:18px; border-bottom:1px solid #e6ebf3; }
+.settings-panel-head h2 { font-size:1.6rem; margin:5px 0; }
+.settings-section { padding:20px 0; border-bottom:1px solid #e6ebf3; display:grid; gap:10px; }
+.settings-section h3 { margin:0 0 4px; font-size:1rem; }
+.settings-section input[type="text"], .settings-section input[type="url"], .settings-section select { width:100%; padding:11px 12px; border:1px solid #dce4ef; border-radius:10px; background:#fff; color:#172b43; }
+.switch-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px; border:1px solid #e1e8f1; border-radius:12px; }
+.switch-row strong, .switch-row small { display:block; }
+.switch-row small { color:#718097; font-size:.78rem; line-height:1.45; margin-top:4px; }
+.switch-row input { width:20px; height:20px; accent-color:#183b63; flex-shrink:0; }
+main { max-width:1120px; margin:0 auto; padding:28px 20px 48px; }
+.hero { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:24px; }
+.eyebrow { color:#d76e1c; text-transform:uppercase; letter-spacing:1.5px; font-size:.76rem; font-weight:900; }
+h1,h2,h3,p { margin-top:0; }
+h1 { font-size:clamp(1.8rem,4vw,2.7rem); line-height:1.08; margin:8px 0 10px; letter-spacing:-1px; }
+h2 { font-size:1.15rem; margin-bottom:5px; }
+.sub { color:#62728a; margin:0; line-height:1.55; }
+.level-pill { background:#fff1df; color:#8b4a0b; padding:12px 16px; border-radius:14px; font-weight:850; white-space:nowrap; }
+.stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:22px; }
+.card { background:#fff; border:1px solid #e1e8f1; border-radius:18px; padding:20px; box-shadow:0 6px 20px #172b4308; }
+.stat-label { color:#687990; font-size:.82rem; font-weight:700; }
+.stat-value { font-size:1.8rem; font-weight:900; margin:7px 0 3px; letter-spacing:-.6px; }
+.stat-note { color:#718097; font-size:.8rem; }
+.progress-track { height:9px; border-radius:999px; background:#e9eef5; overflow:hidden; margin-top:12px; }
+.progress-fill { height:100%; background:var(--site-secondary); width:0; transition:width .25s; border-radius:999px; }
+.layout { display:grid; grid-template-columns:minmax(0,1fr); gap:18px; align-items:start; }
+.section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; }
+.section-head p { color:#738198; font-size:.83rem; margin:4px 0 0; }
+.missions { display:grid; gap:11px; }
+.mission { display:flex; align-items:center; gap:13px; padding:14px; border:1px solid #e6ebf3; border-radius:14px; }
+.mission-icon { flex-shrink:0; width:45px; height:45px; border-radius:13px; display:grid; place-items:center; background:#edf3fb; font-size:1.35rem; }
+.mission-body { flex:1; min-width:0; }
+.mission-body strong { display:block; margin-bottom:4px; }
+.mission-body small { color:#738198; }
+.tag { font-size:.75rem; font-weight:850; color:#8b4a0b; background:#fff1df; padding:6px 8px; border-radius:9px; white-space:nowrap; }
+.btn { border:0; border-radius:11px; padding:10px 14px; font-weight:850; background:var(--site-primary); color:white; }
+.btn.secondary { background:#edf2f8; color:#233954; }
+.btn.orange { background:var(--site-secondary); color:#172b43; }
+.btn:disabled { opacity:.45; cursor:not-allowed; }
+.side-stack { display:grid; gap:18px; }
+.week-list { display:grid; gap:10px; }
+.week-row { display:flex; align-items:center; gap:10px; }
+.week-day { width:38px; height:38px; display:grid; place-items:center; background:#edf2f8; border-radius:11px; font-weight:900; font-size:.82rem; }
+.week-detail { flex:1; }
+.week-detail strong { display:block; font-size:.88rem; }
+.week-detail small { color:#718097; }
+.check { color:#17865b; font-weight:900; }
+.calendar-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:14px 0; }
+.calendar-toolbar button { background:#edf2f8; color:#233954; border:0; border-radius:9px; padding:8px 11px; font-weight:900; }
+.calendar-title { font-weight:900; }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+.weekday { text-align:center; font-size:.72rem; color:#718097; font-weight:800; padding:5px 0; }
+.calendar-day { min-height:56px; border:1px solid #e7edf4; background:#fff; border-radius:10px; padding:7px; text-align:left; color:#233954; }
+.calendar-day.muted { opacity:.4; }
+.calendar-day.selected { outline:2px solid var(--site-secondary); border-color:var(--site-secondary); }
+.calendar-day.today { background:#edf4fc; }
+.day-num { font-size:.8rem; font-weight:850; }
+.event-dot { display:block; width:7px; height:7px; border-radius:50%; margin-top:7px; background:#e98a31; }
+.event-dot.game { background:#3477bd; }
+.legend { display:flex; gap:14px; flex-wrap:wrap; font-size:.78rem; color:#66778e; margin-top:12px; }
+.legend span { display:flex; align-items:center; gap:6px; }
+.legend i { display:inline-block; width:8px; height:8px; border-radius:50%; background:#e98a31; }
+.legend i.game { background:#3477bd; }
+.selected-events { margin-top:16px; padding-top:14px; border-top:1px solid #e8edf4; }
+.event-row { display:flex; gap:9px; padding:8px 0; align-items:flex-start; font-size:.86rem; }
+.event-label { width:8px; height:8px; border-radius:50%; background:#e98a31; margin-top:5px; flex-shrink:0; }
+.event-label.game { background:#3477bd; }
+.empty { color:#7b899c; font-size:.85rem; padding:8px 0; }
+.settings { display:grid; gap:10px; }
+.field-label { display:block; font-size:.82rem; font-weight:800; margin-bottom:6px; }
+input[type="url"], input[type="number"] { width:100%; padding:11px 12px; border:1px solid #dce4ef; border-radius:10px; background:#fff; color:#172b43; }
+.file-input { font-size:.8rem; width:100%; }
+.notice { color:#6b7a90; font-size:.8rem; line-height:1.5; margin:10px 0 0; }
+.achievements { display:flex; gap:8px; flex-wrap:wrap; }
+.achievement { background:#f2f5f9; border:1px solid #e1e8f1; padding:9px 10px; border-radius:11px; font-size:.8rem; font-weight:800; }
+footer { text-align:center; color:#8491a3; font-size:.78rem; padding:20px; }
+.modal-backdrop { position:fixed; inset:0; background:#101b2dcc; display:none; place-items:center; padding:20px; z-index:5; }
+.modal-backdrop.open { display:grid; }
+.modal { width:min(520px,100%); background:#fff; border-radius:20px; padding:24px; box-shadow:0 25px 90px #0003; max-height:90vh; overflow:auto; }
+.modal-top { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.exercise-list { padding-left:20px; line-height:1.7; color:#40536c; }
+.timer { font-size:2rem; font-weight:900; text-align:center; padding:15px; background:#f1f5fa; border-radius:13px; margin:15px 0; }
+.modal-actions { display:flex; gap:9px; flex-wrap:wrap; }
+@media(max-width:800px) { .stats{grid-template-columns:repeat(2,minmax(0,1fr));} .layout{grid-template-columns:1fr;} .hero{align-items:flex-start; flex-direction:column;} .topbar{padding:16px 20px;} }
+@media(max-width:430px) { main{padding:20px 12px 36px;} .card{padding:15px;} .stats{gap:9px;} .stat-value{font-size:1.5rem;} .calendar-day{min-height:46px;padding:5px;} .tag{display:none;} .top-meta{font-size:.75rem;} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">🏒</div><div>HOCKEY QUEST<div style="font-size:.72rem;font-weight:600;opacity:.75;margin-top:3px">Ton entraînement. Ta progression.</div></div></div>
+    <div class="top-actions"><div class="top-meta">MODE ENTRAÎNEMENT<br><strong>Construis ton jeu, un défi à la fois.</strong></div><button class="top-settings" id="open-settings" aria-controls="settings-panel" aria-expanded="false">⚙️ Paramètres</button></div>
+  </header>
+  <div class="settings-overlay" id="settings-overlay"></div>
+  <aside class="settings-panel" id="settings-panel" aria-label="Paramètres Hockey Quest" aria-hidden="true">
+    <div class="settings-panel-head"><div><div class="eyebrow">PERSONNALISATION</div><h2>Paramètres</h2><p class="sub">Ton profil, ton calendrier et tes rappels.</p></div><button class="btn secondary" id="close-settings" aria-label="Fermer les paramètres">✕</button></div>
+    <div class="settings-section">
+      <h3>👤 Profil du joueur</h3>
+      <label class="field-label" for="profile-name">Prénom ou surnom</label><input type="text" id="profile-name" maxlength="40" placeholder="Ex. Alex">
+      <label class="field-label" for="profile-position">Position</label><select id="profile-position"><option value="Défenseur">Défenseur</option><option value="Attaquant">Attaquant</option><option value="Gardien">Gardien</option><option value="Polyvalent">Polyvalent</option></select>
+      <label class="field-label" for="profile-goal">Objectif hebdomadaire</label><select id="profile-goal"><option value="2">2 séances par semaine</option><option value="3">3 séances par semaine</option><option value="4" selected>4 séances par semaine</option><option value="5">5 séances par semaine</option></select>
+      <button class="btn" id="save-profile">Enregistrer le profil</button><p class="notice" id="profile-status">Ton profil est enregistré sur cet appareil.</p>
+    </div>
+    <div class="settings-section">
+      <h3>📅 Importer le calendrier</h3>
+      <p class="notice">Choisis un fichier calendrier .ics reçu de ton équipe pour importer les pratiques et les matchs.</p>
+      <label class="field-label" for="settings-ics-file">Fichier calendrier (.ics)</label><input class="file-input" type="file" id="settings-ics-file" accept=".ics,text/calendar">
+      <p class="notice" id="settings-ics-status">Aucun nouveau fichier importé.</p>
+      <label class="field-label" for="settings-team-url">Lien de l'horaire de l'équipe</label><input type="url" id="settings-team-url" value="https://page.spordle.com/fr/ahm-gatineau/teams/212939?tab=schedule" placeholder="https://...">
+      <button class="btn secondary" id="settings-open-team">Ouvrir l'horaire ↗</button>
+    </div>
+    <div class="settings-section">
+      <h3>🔔 Rappels</h3>
+      <label class="switch-row"><span><strong>Notifications du navigateur</strong><small>Rappel environ 1 heure avant un événement importé.</small></span><input type="checkbox" id="reminder-toggle"></label>
+      <p class="notice" id="settings-reminder-status">Désactivées. Le navigateur doit autoriser les notifications et rester ouvert.</p>
+    </div>
+  </aside>
+  <main>
+    <section class="hero">
+      <div><div class="eyebrow">Ta saison commence ici</div><h1>Prêt à passer au<br>prochain niveau?</h1><p class="sub">Des séances à la maison pour développer tes habiletés de hockey, une mission à la fois.</p></div>
+      <div class="level-pill">⭐ Niveau <span id="level">1</span> · Rookie</div>
+    </section>
+    <section class="stats">
+      <div class="card"><div class="stat-label">EXPÉRIENCE (XP)</div><div class="stat-value"><span id="xp">0</span></div><div class="stat-note"><span id="next-xp">100</span> XP pour le prochain niveau</div><div class="progress-track"><div id="xp-bar" class="progress-fill"></div></div></div>
+      <div class="card"><div class="stat-label">MISSIONS TERMINÉES</div><div class="stat-value" id="completed">0</div><div class="stat-note">Chaque effort compte</div></div>
+      <div class="card"><div class="stat-label">MINUTES ACTIVES</div><div class="stat-value" id="minutes">0</div><div class="stat-note">Le travail fait la différence</div></div>
+      <div class="card"><div class="stat-label">CETTE SEMAINE</div><div class="stat-value"><span id="week-count">0</span>/4</div><div class="stat-note">Séances à la maison</div></div>
+    </section>
+    <div class="layout">
+      <div class="side-stack">
+        <section class="card">
+          <div class="section-head"><div><h2>🎯 Missions et objectifs</h2><p>Chaque mission t'aide à atteindre ton objectif de la semaine.</p></div><span class="tag">30 MIN</span></div>
+          <div class="week-list" id="week-list"></div>
+          <div class="progress-track"><div id="week-bar" class="progress-fill"></div></div>
+          <p class="notice" id="weekly-goal-note">Complète tes séances pour faire progresser ta semaine.</p>
+          <div class="missions" id="mission-grid"></div>
+        </section>
+        <section class="card">
+          <div class="section-head"><div><h2>📅 Calendrier de l'équipe</h2><p>Planifie tes entraînements et tes matchs.</p></div></div>
+          <div class="calendar-toolbar"><button id="calendar-prev" aria-label="Mois précédent">←</button><div class="calendar-title" id="calendar-month-label"></div><button id="calendar-next" aria-label="Mois suivant">→</button></div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+          <div class="legend"><span><i></i> Pratique</span><span><i class="game"></i> Match</span></div>
+          <div class="selected-events" id="selected-events"></div>
+        </section>
+      </div>
+      <div class="side-stack">
+        <section class="card">
+          <div class="section-head"><div><h2>🏆 Tes récompenses</h2><p>Les efforts débloquent des badges.</p></div></div>
+          <div class="achievements" id="achievements"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer>Hockey Quest · Progresse avec constance, joue avec confiance.</footer>
+</div>
+<div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-top"><div><div class="eyebrow" id="modal-kicker">MISSION</div><h2 id="modal-title">Entraînement</h2></div><button class="btn secondary" id="close-modal" aria-label="Fermer">✕</button></div>
+    <p class="sub" id="modal-description"></p><ul class="exercise-list" id="exercise-list"></ul>
+    <div class="timer" id="timer">30:00</div><div class="modal-actions"><button class="btn" id="timer-toggle">Démarrer le chrono</button><button class="btn orange" id="finish-mission">Terminer la mission + XP</button></div>
+    <p class="notice" id="modal-safety">Fais les exercices dans un espace dégagé. Arrête si tu ressens une douleur et demande conseil à un adulte ou à ton entraîneur.</p>
+  </div>
+</div>
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const missions = [
+    {id:'hands',icon:'🏒',name:'Mains rapides',subtitle:'Maniement du bâton',duration:30,xp:40,description:'Travaille le contrôle de la rondelle et garde la tête levée.',steps:['5 min — échauffement doux des poignets et des épaules','8 min — contrôle avant-arrière, des deux côtés','8 min — déplacements latéraux autour de repères','5 min — tête levée : nomme des objets autour de toi','4 min — retour au calme']},
+    {id:'strengthA',icon:'🦵',name:'Base solide',subtitle:'Jambes et équilibre',duration:30,xp:45,description:'Développe une base stable avec des mouvements contrôlés.',steps:['5 min — échauffement et mobilité','3 séries de squats au poids du corps, sans douleur','3 séries de fentes arrière alternées, amplitude confortable','3 séries de ponts fessiers et de montées sur pointes','5 min — équilibre sur chaque jambe et retour au calme']},
+    {id:'shot',icon:'🥅',name:'Précision au tir',subtitle:'Technique et contrôle',duration:30,xp:40,description:'Privilégie la technique et la précision plutôt que la puissance.',steps:['5 min — échauffement du haut du corps','10 min — gestes de tir sans rondelle, contrôle du mouvement','10 min — tirs précis vers des cibles sécuritaires','5 min — ramassage et retour au calme']},
+    {id:'strengthB',icon:'💪',name:'Haut du corps et tronc',subtitle:'Force fonctionnelle',duration:30,xp:45,description:'Renforce le tronc et le haut du corps avec une bonne technique.',steps:['5 min — échauffement des épaules et du tronc','3 séries de pompes adaptées à ton niveau','3 séries de bird-dogs contrôlés de chaque côté','3 séries de planche courte, sans retenir ta respiration','5 min — mobilité et retour au calme']}
+  ];
+  const today = new Date();
+  const dateKey = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const defaultEvents = [
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),3)),type:'practice',title:'Pratique',time:'18:30'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),6)),type:'game',title:'Match',time:'14:00'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),8)),type:'practice',title:'Pratique',time:'18:30'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),10)),type:'practice',title:'Pratique',time:'18:30'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),13)),type:'game',title:'Match',time:'11:00'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),15)),type:'practice',title:'Pratique',time:'18:30'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),20)),type:'game',title:'Match',time:'15:00'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),22)),type:'practice',title:'Pratique',time:'18:30'},
+    {date:dateKey(new Date(today.getFullYear(),today.getMonth(),27)),type:'practice',title:'Pratique',time:'18:30'}
+  ];
+  let state = {xp:0,minutes:0,done:[],weekDone:[],events:defaultEvents.slice(),selectedDate:dateKey(today),month:new Date(today.getFullYear(),today.getMonth(),1),timerSeconds:1800,timerRunning:false,activeMission:null};
+  let timerInterval = null;
+  function save(){try{localStorage.setItem('hockeyQuestState',JSON.stringify({xp:state.xp,minutes:state.minutes,done:state.done,weekDone:state.weekDone,events:state.events,selectedDate:state.selectedDate,month:dateKey(state.month)}));}catch(e){}}
+  function load(){try{const raw=localStorage.getItem('hockeyQuestState');if(!raw)return;const s=JSON.parse(raw);state.xp=Number(s.xp)||0;state.minutes=Number(s.minutes)||0;state.done=Array.isArray(s.done)?s.done:[];state.weekDone=Array.isArray(s.weekDone)?s.weekDone:[];if(Array.isArray(s.events))state.events=s.events;if(s.selectedDate)state.selectedDate=s.selectedDate;if(s.month){const d=new Date(s.month+'T12:00:00');if(!isNaN(d))state.month=new Date(d.getFullYear(),d.getMonth(),1);}}catch(e){}}
+  function level(){return Math.floor(state.xp/100)+1;}
+  function weekStart(d){const x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return dateKey(x);}
+  function renderStats(){
+    const lvl=level(),into=state.xp%100;
+    $('level').textContent=lvl;$('xp').textContent=state.xp;$('next-xp').textContent=100-into;$('xp-bar').style.width=into+'%';
+    $('completed').textContent=state.done.length;$('minutes').textContent=state.minutes;
+    const start=weekStart(today),end=new Date(start+'T12:00:00');end.setDate(end.getDate()+7);
+    const count=state.weekDone.filter(x=>x.week===start).length;
+    $('week-count').textContent=count;$('week-bar').style.width=Math.min(100,count/4*100)+'%';
+    const labels=['Mains rapides','Base solide','Précision au tir','Haut du corps'];
+    $('week-list').innerHTML=labels.map((label,i)=>'<div class="week-row"><div class="week-day">'+(i+1)+'</div><div class="week-detail"><strong>'+label+'</strong><small>Séance à la maison</small></div>'+(i<count?'<span class="check">✓</span>':'<span style="color:#a2adbb">○</span>')+'</div>').join('');
+    const badges=[];if(state.done.length>=1)badges.push('🥉 Première mission');if(state.done.length>=4)badges.push('🏒 Semaine active');if(state.xp>=200)badges.push('⭐ 200 XP');if(state.done.length>=10)badges.push('🔥 Persévérance');if(!badges.length)badges.push('🔒 Termine une mission pour gagner ton premier badge');
+    $('achievements').innerHTML=badges.map(x=>'<span class="achievement">'+x+'</span>').join('');
+  }
+  function renderMissions(){
+    $('mission-grid').innerHTML=missions.map(m=>{const done=state.done.includes(m.id);return '<div class="mission"><div class="mission-icon">'+m.icon+'</div><div class="mission-body"><strong>'+m.name+'</strong><small>'+m.subtitle+' · '+m.duration+' min</small></div><span class="tag">+'+m.xp+' XP</span><button class="btn '+(done?'secondary':'')+'" data-mission="'+m.id+'">'+(done?'Refaire':'Jouer')+'</button></div>';}).join('');
+    $('mission-grid').querySelectorAll('[data-mission]').forEach(b=>b.addEventListener('click',()=>openMission(b.dataset.mission)));
+  }
+  function renderCalendar(){
+    const m=state.month;const monthName=m.toLocaleDateString('fr-CA',{month:'long',year:'numeric'});$('calendar-month-label').textContent=monthName.charAt(0).toUpperCase()+monthName.slice(1);
+    const first=new Date(m.getFullYear(),m.getMonth(),1);const offset=(first.getDay()+6)%7;const days=new Date(m.getFullYear(),m.getMonth()+1,0).getDate();
+    const cells=[];['L','M','M','J','V','S','D'].forEach((d,i)=>cells.push('<div class="weekday">'+d+'</div>'));
+    for(let i=0;i<42;i++){const num=i-offset+1;const d=new Date(m.getFullYear(),m.getMonth(),num);const key=dateKey(d);const inMonth=num>=1&&num<=days;const ev=state.events.filter(e=>e.date===key);cells.push('<button class="calendar-day '+(!inMonth?'muted ':'')+(key===state.selectedDate?'selected ':'')+(key===dateKey(today)?'today':'')+'" data-date="'+key+'" aria-label="'+key+'"><span class="day-num">'+d.getDate()+'</span>'+(ev.length?'<span class="event-dot '+(ev.some(e=>e.type==='game')?'game':'')+'"></span>':'')+'</button>');}
+    $('calendar-grid').innerHTML=cells.join('');
+    $('calendar-grid').querySelectorAll('[data-date]').forEach(b=>b.addEventListener('click',()=>{state.selectedDate=b.dataset.date;save();renderCalendar();}));
+    const selected=state.events.filter(e=>e.date===state.selectedDate).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    $('selected-events').innerHTML='<strong>'+new Date(state.selectedDate+'T12:00:00').toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'})+'</strong>'+(selected.length?selected.map(e=>'<div class="event-row"><span class="event-label '+(e.type==='game'?'game':'')+'"></span><div><strong>'+escapeHtml(e.title)+'</strong><div class="notice">'+escapeHtml(e.time||'Heure à confirmer')+(e.location?' · '+escapeHtml(e.location):'')+'</div></div></div>').join(''):'<div class="empty">Aucun événement importé pour cette journée.</div>');
+  }
+  function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function render(){renderStats();renderMissions();renderCalendar();}
+  function openMission(id){
+    const m=missions.find(x=>x.id===id);if(!m)return;state.activeMission=m;state.timerSeconds=m.duration*60;state.timerRunning=false;stopTimer();
+    $('modal-kicker').textContent='MISSION · +'+m.xp+' XP';$('modal-title').textContent=m.name;$('modal-description').textContent=m.description;$('exercise-list').innerHTML=m.steps.map(s=>'<li>'+escapeHtml(s)+'</li>').join('');$('timer').textContent=formatTime(state.timerSeconds);$('timer-toggle').textContent='Démarrer le chrono';$('finish-mission').disabled=state.done.includes(id);$('finish-mission').textContent=state.done.includes(id)?'Déjà terminée aujourd’hui':'Terminer la mission + XP';$('modal-backdrop').classList.add('open');
+  }
+  function formatTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+  function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}state.timerRunning=false;}
+  function tick(){if(state.timerSeconds>0){state.timerSeconds--; $('timer').textContent=formatTime(state.timerSeconds);}else{stopTimer();$('timer-toggle').textContent='Chrono terminé';}}
+  $('timer-toggle').addEventListener('click',()=>{if(state.timerRunning){stopTimer();$('timer-toggle').textContent='Reprendre le chrono';}else{state.timerRunning=true;$('timer-toggle').textContent='Mettre en pause';timerInterval=setInterval(tick,1000);}});
+  $('close-modal').addEventListener('click',()=>{$('modal-backdrop').classList.remove('open');stopTimer();});
+  $('modal-backdrop').addEventListener('click',e=>{if(e.target===$('modal-backdrop')){$('modal-backdrop').classList.remove('open');stopTimer();}});
+  $('finish-mission').addEventListener('click',()=>{const m=state.activeMission;if(!m||state.done.includes(m.id))return;state.done.push(m.id);state.xp+=m.xp;state.minutes+=m.duration;state.weekDone.push({id:m.id,week:weekStart(today)});save();render();$('finish-mission').disabled=true;$('finish-mission').textContent='Mission terminée ✓';$('modal-kicker').textContent='BRAVO · +'+m.xp+' XP';});
+  $('calendar-prev').addEventListener('click',()=>{state.month=new Date(state.month.getFullYear(),state.month.getMonth()-1,1);renderCalendar();save();});
+  $('calendar-next').addEventListener('click',()=>{state.month=new Date(state.month.getFullYear(),state.month.getMonth()+1,1);renderCalendar();save();});
+  function parseIcs(text){
+    const unfolded=text.replace(/\r?\n[ \t]/g,'');const blocks=unfolded.split('BEGIN:VEVENT').slice(1);const parsed=[];const seen=new Set();
+    blocks.forEach(block=>{
+      const body=block.split('END:VEVENT')[0];
+      const get=(key)=>{const re=new RegExp('^'+key+'(?:;[^:]*)?:(.*)$','mi');const m=body.match(re);return m?m[1].trim():'';};
+      const raw=get('DTSTART');if(!raw)return;const match=raw.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?/);if(!match)return;
+      const start=new Date(Number(match[1]),Number(match[2])-1,Number(match[3]),Number(match[4]||0),Number(match[5]||0));
+      const time=match[4]?match[4]+':'+match[5]:'Heure à confirmer';const summary=get('SUMMARY')||'Événement d’équipe';const lower=summary.toLowerCase();
+      const base={time,title:summary,type:/match|game|partie|tournoi/.test(lower)?'game':'practice',location:get('LOCATION')};
+      const add=(d)=>{const date=dateKey(d);const key=[date,base.time,base.title].join('|');if(!seen.has(key)){seen.add(key);parsed.push({...base,date});}};
+      add(start);
+      const rule=get('RRULE');
+      if(rule){const parts={};rule.split(';').forEach(part=>{const pair=part.split('=');if(pair.length===2)parts[pair[0].toUpperCase()]=pair[1];});
+        const freq=parts.FREQ;const interval=Math.max(1,Number(parts.INTERVAL)||1);const count=Math.min(100,Math.max(1,Number(parts.COUNT)||100));
+        let until=null;if(parts.UNTIL){const u=parts.UNTIL.match(/^(\d{4})(\d{2})(\d{2})/);if(u)until=new Date(Number(u[1]),Number(u[2])-1,Number(u[3]),23,59,59);}
+        if(freq==='DAILY'||freq==='WEEKLY'){let added=1;for(let i=1;i<=365&&added<count;i++){const d=new Date(start);d.setDate(d.getDate()+i*(freq==='WEEKLY'?7*interval:interval));if(until&&d>until)break;if(d<start)continue;add(d);added++;if(d.getTime()-start.getTime()>366*86400000)break;}}
+      }
+    });
+    return parsed.sort((a,b)=>(a.date+' '+a.time).localeCompare(b.date+' '+b.time));
+  }
+  function convertUtcEventsToLocal(events){return events.map(e=>{if(!/^\d{2}:\d{2}$/.test(e.time||''))return e;const d=new Date(e.date+'T'+e.time+':00Z');return {...e,date:dateKey(d),time:d.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',hour12:false})};}).sort((a,b)=>(a.date+' '+a.time).localeCompare(b.date+' '+b.time));}
+  const notified=new Set();
+  function openSettings(){ $('settings-panel').classList.add('open');$('settings-overlay').classList.add('open');$('settings-panel').setAttribute('aria-hidden','false');$('open-settings').setAttribute('aria-expanded','true'); }
+  function closeSettings(){ $('settings-panel').classList.remove('open');$('settings-overlay').classList.remove('open');$('settings-panel').setAttribute('aria-hidden','true');$('open-settings').setAttribute('aria-expanded','false'); }
+  $('open-settings').addEventListener('click',openSettings);
+  $('close-settings').addEventListener('click',closeSettings);
+  $('settings-overlay').addEventListener('click',closeSettings);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
+  function loadProfile(){
+    try{
+      const p=JSON.parse(localStorage.getItem('hockeyQuestProfile')||'{}');
+      $('profile-name').value=p.name||'';
+      $('profile-position').value=p.position||'Défenseur';
+      $('profile-goal').value=String(p.goal||4);
+      $('reminder-toggle').checked=localStorage.getItem('hockeyQuestReminders')==='on';
+      $('settings-reminder-status').textContent=$('reminder-toggle').checked?'Activées si les notifications du navigateur sont autorisées.':'Désactivées. Le navigateur doit autoriser les notifications et rester ouvert.';
+      const name=p.name? p.name.trim() : '';
+      if(name) document.querySelector('.hero h1').innerHTML='Bon entraînement,<br>'+escapeHtml(name)+'!';
+    }catch(e){}
+  }
+  $('save-profile').addEventListener('click',()=>{
+    const profile={name:$('profile-name').value.trim(),position:$('profile-position').value,goal:Number($('profile-goal').value)||4};
+    try{localStorage.setItem('hockeyQuestProfile',JSON.stringify(profile));$('profile-status').textContent='Profil enregistré sur cet appareil.';const name=profile.name;if(name)document.querySelector('.hero h1').innerHTML='Bon entraînement,<br>'+escapeHtml(name)+'!';else document.querySelector('.hero h1').innerHTML='Prêt à passer au<br>prochain niveau?';renderStats();}catch(e){$('profile-status').textContent='Impossible d’enregistrer le profil sur cet appareil.';}
+  });
+  $('settings-open-team').addEventListener('click',()=>{
+    const url=$('settings-team-url').value.trim();
+    try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw new Error();window.open(u.href,'_blank','noopener,noreferrer');$('settings-ics-status').textContent='La page de ton équipe devrait s’ouvrir dans un nouvel onglet.';}catch(e){$('settings-ics-status').textContent='Entre un lien web valide qui commence par https://';}
+  });
+  $('settings-ics-file').addEventListener('change',async e=>{
+    const file=e.target.files&&e.target.files[0];if(!file)return;
+    try{const text=await file.text();const events=parseIcs(text);
+      if(!events.length){$('settings-ics-status').textContent='Aucun événement lisible trouvé dans ce fichier .ics.';return;}
+      const localEvents=convertUtcEventsToLocal(events);state.events=localEvents;state.selectedDate=localEvents[0].date;state.month=new Date(localEvents[0].date+'T12:00:00');state.month=new Date(state.month.getFullYear(),state.month.getMonth(),1);save();renderCalendar();
+      $('settings-ics-status').textContent=events.length+' événement(s) importé(s) avec succès.';e.target.value='';
+    }catch(err){$('settings-ics-status').textContent='Impossible de lire ce fichier calendrier.';}
+  });
+  $('reminder-toggle').addEventListener('change',async()=>{
+    if(!$('reminder-toggle').checked){try{localStorage.setItem('hockeyQuestReminders','off');}catch(e){}$('settings-reminder-status').textContent='Rappels désactivés.';return;}
+    if(!('Notification'in window)){$('reminder-toggle').checked=false;$('settings-reminder-status').textContent='Ce navigateur ne prend pas en charge les notifications.';return;}
+    try{const permission=await Notification.requestPermission();if(permission==='granted'){localStorage.setItem('hockeyQuestReminders','on');$('settings-reminder-status').textContent='Rappels activés : notification environ 1 heure avant les événements importés. Garde la page ouverte.';checkReminders();}else{$('reminder-toggle').checked=false;localStorage.setItem('hockeyQuestReminders','off');$('settings-reminder-status').textContent='Autorise les notifications dans les paramètres du navigateur pour les activer.';}}
+    catch(e){$('reminder-toggle').checked=false;$('settings-reminder-status').textContent='Impossible d’activer les notifications dans ce navigateur.';}
+  });
+  function checkReminders(){if(localStorage.getItem('hockeyQuestReminders')!=='on'||!('Notification'in window)||Notification.permission!=='granted')return;const now=new Date();state.events.forEach(e=>{if(!e.time||!/^[0-2]\d:[0-5]\d$/.test(e.time))return;const dt=new Date(e.date+'T'+e.time+':00');const diff=dt-now;if(diff>0&&diff<=3600000&&!notified.has(e.date+e.time+e.title)){new Notification('Hockey Quest · rappel',{body:e.title+' à '+e.time});notified.add(e.date+e.time+e.title);}});}
+  load();loadProfile();render();setInterval(checkReminders,30000);
+})();
+</script>
+</body>
+</html>
